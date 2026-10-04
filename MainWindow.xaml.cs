@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -54,6 +54,7 @@ public partial class MainWindow : Window
         };
         ScanList.ItemsSource = _scanView;
 
+        LanguageBox.SelectedIndex = Loc.Language == "en" ? 1 : 0;
         _heartTimer.Tick += (_, _) => HeroHeartTick();
         SourceInitialized += (_, _) => UseDarkTitleBar();
         Loaded += OnLoaded;
@@ -71,7 +72,7 @@ public partial class MainWindow : Window
         _scanner.DeviceSeen += result => Dispatcher.BeginInvoke(() => OnDeviceSeen(result));
         _scanner.Failed += message => Dispatcher.BeginInvoke(() => OnScannerFailed(message));
 
-        // Saved watches are listed but never connected on startup; the user presses "Bağlan"
+        // Saved watches are listed but never connected on startup; the user presses Connect
         foreach (var saved in _settings.Devices)
         {
             var row = AddRow(saved.Id, saved.Name);
@@ -79,11 +80,8 @@ public partial class MainWindow : Window
             row.RandomAddress = saved.RandomAddress;
         }
 
-        SetStatus(_rows.Count > 0
-            ? "Saatte HR veri yayınını aç, sonra kayıtlı saatinde “Bağlan”a bas."
-            : "Başlamak için “Tara”ya bas ve saatini seç. Saatte HR veri yayını açık olmalı.");
-        RefreshHero();
-        RefreshEmptyStates();
+        SetStatus(Loc.T(_rows.Count > 0 ? "status.startSaved" : "status.startNew"));
+        RefreshTexts();
     }
 
     void StartServer()
@@ -94,16 +92,16 @@ public partial class MainWindow : Window
             _server.ClientCountChanged += count => Dispatcher.BeginInvoke(() => ObsClients.Text = count.ToString());
             _server.Start();
             UrlBox.Text = _server.BaseUrl;
-            ServerText.Text = $"Sunucu hazır · localhost:{_settings.Port}";
+            ServerText.Text = Loc.F("server.ready", _settings.Port);
             ServerDot.Fill = Palette.Live;
         }
         catch (Exception ex)
         {
             _server = null;
             UrlBox.Text = "—";
-            ServerText.Text = "Sunucu başlatılamadı";
+            ServerText.Text = Loc.T("server.failed");
             ServerDot.Fill = Palette.Error;
-            SetStatus($"Port {_settings.Port} kullanılamıyor ({ex.Message}). Başka bir program bu portu kullanıyor olabilir.");
+            SetStatus(Loc.F("server.portBusy", _settings.Port, ex.Message));
         }
     }
 
@@ -167,23 +165,23 @@ public partial class MainWindow : Window
         {
             case LinkState.Live when row.HadDrop:
                 row.HadDrop = false;
-                SetStatus($"{row.Name}: yeniden bağlandı, veri geliyor ✓");
+                SetStatus(Loc.F("status.reconnected", row.Name));
                 break;
             case LinkState.Live when previous != LinkState.Live && previous != LinkState.SignalLost:
-                SetStatus($"{row.Name}: canlı nabız geliyor ✓");
+                SetStatus(Loc.F("status.live", row.Name));
                 break;
             case LinkState.Live when previous == LinkState.SignalLost:
-                SetStatus($"{row.Name}: sinyal geri geldi ✓");
+                SetStatus(Loc.F("status.signalBack", row.Name));
                 break;
             case LinkState.SignalLost:
-                SetStatus($"{row.Name}: birkaç saniyedir veri yok, bekleniyor…");
+                SetStatus(Loc.F("status.signalLost", row.Name));
                 break;
             case LinkState.WaitingForData:
-                SetStatus($"{row.Name}: bağlandı, saatten veri bekleniyor…");
+                SetStatus(Loc.F("status.waiting", row.Name));
                 break;
             case LinkState.Reconnecting when attempt == 1:
                 row.HadDrop = true;
-                SetStatus($"{row.Name}: {error ?? "bağlantı koptu"}. Otomatik yeniden bağlanılıyor…");
+                SetStatus(Loc.F("status.dropped", row.Name, error ?? Loc.T("status.droppedDefault")));
                 break;
         }
         UpdateWatcher();
@@ -208,9 +206,9 @@ public partial class MainWindow : Window
     {
         SetStatus(ev switch
         {
-            { Kind: "scare" } => $"😱 {ev.Name}: korku anı! Nabız birden {ev.Value} arttı ({ev.Bpm} BPM).",
-            { Kind: "record", Scope: "alltime" } => $"👑 {ev.Name}: tüm zamanların rekoru, {ev.Bpm} BPM!",
-            _ => $"🏆 {ev.Name}: yayının yeni rekoru, {ev.Bpm} BPM."
+            { Kind: "scare" } => Loc.F("status.scare", ev.Name, ev.Value, ev.Bpm),
+            { Kind: "record", Scope: "alltime" } => Loc.F("status.recordAll", ev.Name, ev.Bpm),
+            _ => Loc.F("status.recordSession", ev.Name, ev.Bpm)
         });
     }
 
@@ -226,10 +224,7 @@ public partial class MainWindow : Window
         _userScanning = on;
         if (on) _scanItems.Clear();
         UpdateWatcher();
-        ScanButton.Content = on ? "Durdur" : "Tara";
-        ScanHint.Text = on
-            ? "Taranıyor… Saatin listede görünmüyorsa HR veri yayınını kapatıp tekrar aç."
-            : "Saatte: Ayarlar → HR veri yayını → Aç. Sonra “Tara”ya bas.";
+        RefreshScanTexts();
         RefreshEmptyStates();
     }
 
@@ -243,7 +238,7 @@ public partial class MainWindow : Window
         if (item == null)
         {
             item = new ScanItemVm(result.Id, result.Address, result.RandomAddress,
-                result.Name ?? $"Nabız cihazı ({result.Id})", result.HasHeartRate)
+                result.Name ?? Loc.F("scan.hrDevice", result.Id), result.HasHeartRate)
             {
                 Rssi = result.Rssi,
                 IsSaved = FindRowFor(result.Address, result.Name) != null
@@ -302,7 +297,7 @@ public partial class MainWindow : Window
             _retargetedAt[key] = now;
 
             connection.Retarget(result.Address, result.RandomAddress);
-            SetStatus($"{row.Name}: “{result.Name ?? result.Id}” olarak görüldü, bağlanılıyor…");
+            SetStatus(Loc.F("status.seenAs", row.Name, result.Name ?? result.Id));
         }
     }
 
@@ -357,7 +352,7 @@ public partial class MainWindow : Window
         else
             StartConnection(row);
         ConnectButton.IsEnabled = false;
-        SetStatus($"{item.Name}: bağlanılıyor…");
+        SetStatus(Loc.F("status.connecting", item.Name));
     }
 
     // ── Saved watch rows ──────────────────────────────────────────────────
@@ -367,9 +362,9 @@ public partial class MainWindow : Window
         if ((sender as FrameworkElement)?.DataContext is not DeviceRowVm row) return;
         if (row.IsActive)
         {
-            SetStatus($"{row.Name}: bağlantı kesiliyor…");
+            SetStatus(Loc.F("status.disconnecting", row.Name));
             await StopConnectionAsync(row);
-            SetStatus($"{row.Name}: bağlantı kesildi.");
+            SetStatus(Loc.F("status.disconnected", row.Name));
         }
         else
         {
@@ -380,13 +375,13 @@ public partial class MainWindow : Window
     void CopyDeviceUrl_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.DataContext is not DeviceRowVm row || _server == null) return;
-        CopyToClipboard($"{_server.BaseUrl}overlay/{row.Id}", $"{row.Name} için overlay adresi kopyalandı.");
+        CopyToClipboard($"{_server.BaseUrl}overlay/{row.Id}", Loc.F("status.urlCopiedDevice", row.Name));
     }
 
     async void Forget_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.DataContext is not DeviceRowVm row) return;
-        var answer = MessageBox.Show(this, $"“{row.Name}” unutulsun mu?", "Pulse Overlay",
+        var answer = MessageBox.Show(this, Loc.F("confirm.forget", row.Name), "Pulse Overlay",
             MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (answer != MessageBoxResult.Yes) return;
 
@@ -397,7 +392,7 @@ public partial class MainWindow : Window
         await StopConnectionAsync(row);
         _hub.Remove(row.Id);
         RefreshHero();
-        SetStatus($"{row.Name} unutuldu.");
+        SetStatus(Loc.F("status.forgotten", row.Name));
     }
 
     void SaveDevices()
@@ -420,7 +415,7 @@ public partial class MainWindow : Window
         var row = AddRow(Simulator.DeviceId, Simulator.DeviceName, simulated: true);
         row.IsActive = true;
         _simulator = new Simulator(_hub);
-        SetStatus("Simülatör açık: overlay sahte nabız gösteriyor.");
+        SetStatus(Loc.T("status.simOn"));
     }
 
     void SimToggle_Unchecked(object sender, RoutedEventArgs e)
@@ -431,35 +426,34 @@ public partial class MainWindow : Window
         if (row != null) _rows.Remove(row);
         RefreshEmptyStates();
         RefreshHero();
-        SetStatus("Simülatör kapatıldı.");
+        SetStatus(Loc.T("status.simOff"));
     }
 
     void ResetStats_Click(object sender, RoutedEventArgs e)
     {
         _hub.ResetStats();
-        SetStatus("Yeni yayın: istatistikler, grafik, yayın rekoru ve korku sayacı sıfırlandı.");
+        SetStatus(Loc.T("status.newStream"));
     }
 
     void ResetRecords_Click(object sender, RoutedEventArgs e)
     {
-        var answer = MessageBox.Show(this,
-            "Tüm zamanların nabız rekoru silinsin mi?\nBu oturumdaki değerler yeni rekor olarak sessizce kaydedilir.",
-            "Pulse Overlay", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        var answer = MessageBox.Show(this, Loc.T("confirm.resetRecord"), "Pulse Overlay",
+            MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (answer != MessageBoxResult.Yes) return;
         _hub.ResetRecords();
-        SetStatus("Tüm zamanların rekoru sıfırlandı.");
+        SetStatus(Loc.T("status.recordReset"));
     }
 
     // ── Overlay ───────────────────────────────────────────────────────────
 
     void CopyUrl_Click(object sender, RoutedEventArgs e)
     {
-        if (_server != null) CopyToClipboard(_server.BaseUrl, "Adres kopyalandı. OBS'te Tarayıcı kaynağına yapıştır.");
+        if (_server != null) CopyToClipboard(_server.BaseUrl, Loc.T("status.urlCopied"));
     }
 
     void OpenEditor_Click(object sender, RoutedEventArgs e)
     {
-        if (_server != null) OpenInBrowser(_server.BaseUrl + "editor");
+        if (_server != null) OpenInBrowser($"{_server.BaseUrl}editor?ui={Loc.Language}");
     }
 
     void OpenOverlay_Click(object sender, RoutedEventArgs e)
@@ -470,7 +464,7 @@ public partial class MainWindow : Window
     void OpenInBrowser(string url)
     {
         try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
-        catch (Exception ex) { SetStatus($"Tarayıcı açılamadı: {ex.Message}"); }
+        catch (Exception ex) { SetStatus(Loc.F("status.browserFailed", ex.Message)); }
     }
 
     void CopyToClipboard(string text, string message)
@@ -482,7 +476,7 @@ public partial class MainWindow : Window
         }
         catch
         {
-            SetStatus("Pano şu an meşgul, tekrar dene.");
+            SetStatus(Loc.T("status.clipboardBusy"));
         }
     }
 
@@ -493,11 +487,11 @@ public partial class MainWindow : Window
         var primary = _rows.FirstOrDefault(r => r.State == "live") ?? _rows.FirstOrDefault(r => r.IsActive);
         if (primary == null)
         {
-            HeroName.Text = _rows.Count == 0 ? "Henüz saat eklenmedi" : "Saat bağlı değil";
+            HeroName.Text = Loc.T(_rows.Count == 0 ? "hero.noWatch" : "hero.notConnected");
             HeroBpm.Text = "--";
             HeroStats.Text = " ";
             HeroRecords.Text = " ";
-            SetHeroChip("Bağlı değil", Palette.Off);
+            SetHeroChip(Loc.T("state.off"), Palette.Off);
             SetHeroBpm(0);
             return;
         }
@@ -506,11 +500,11 @@ public partial class MainWindow : Window
         HeroName.Text = primary.Name.ToUpperInvariant();
         HeroBpm.Text = live ? primary.Bpm.ToString() : "--";
         HeroStats.Text = primary.Count > 0
-            ? $"Min {primary.Min}   ·   Ort {primary.Avg}   ·   Maks {primary.Max}"
+            ? Loc.F("hero.stats", primary.Min, primary.Avg, primary.Max)
             : " ";
         HeroRecords.Text = primary.IsSimulated
-            ? $"😱 Bu yayında {primary.Scares} korku   ·   simülatör rekor kaydetmez"
-            : $"😱 Bu yayında {primary.Scares} korku   ·   👑 Rekor {(primary.AllTimeMax > 0 ? primary.AllTimeMax : "—")}";
+            ? Loc.F("hero.recordsSim", primary.Scares)
+            : Loc.F("hero.records", primary.Scares, primary.AllTimeMax > 0 ? primary.AllTimeMax : "—");
         SetHeroChip(primary.ShortStateText, primary.StateBrush);
         SetHeroBpm(live ? primary.Bpm : 0);
     }
@@ -554,6 +548,40 @@ public partial class MainWindow : Window
         HeroHeartScale.BeginAnimation(ScaleTransform.ScaleYProperty, pulse);
     }
 
+    // ── Language ──────────────────────────────────────────────────────────
+
+    void LanguageBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded || LanguageBox.SelectedItem is not System.Windows.Controls.ComboBoxItem { Tag: string language }
+            || language == Loc.Language)
+            return;
+        Loc.Set(language);
+        _settings.Language = language;
+        _settings.Save();
+        RefreshTexts();
+        SetStatus(Loc.T("status.langChanged"));
+    }
+
+    /// <summary>Text set from code (XAML-bound text follows the language by itself).</summary>
+    void RefreshTexts()
+    {
+        if (_server != null) ServerText.Text = Loc.F("server.ready", _settings.Port);
+        foreach (var row in _rows)
+        {
+            if (row.IsSimulated) row.Name = Simulator.DeviceName;
+            row.RefreshTexts();
+        }
+        RefreshScanTexts();
+        RefreshHero();
+        RefreshEmptyStates();
+    }
+
+    void RefreshScanTexts()
+    {
+        ScanButton.Content = Loc.T(_userScanning ? "scan.stop" : "scan.scan");
+        ScanHint.Text = Loc.T(_userScanning ? "scan.hintScanning" : "scan.hint");
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     DeviceRowVm? FindRow(string id) => _rows.FirstOrDefault(r => r.Id == id);
@@ -563,11 +591,9 @@ public partial class MainWindow : Window
         EmptyRows.Visibility = _rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         bool anyVisible = !_scanView.IsEmpty;
         ScanEmpty.Visibility = anyVisible ? Visibility.Collapsed : Visibility.Visible;
-        ScanEmpty.Text = _userScanning
-            ? (_scanItems.Count > 0
-                ? "Saat gibi görünen bir cihaz yok. “Tüm cihazları göster”i dene."
-                : "Aranıyor…")
-            : "Bulunan cihazlar burada listelenir.";
+        ScanEmpty.Text = Loc.T(_userScanning
+            ? (_scanItems.Count > 0 ? "scan.noWearable" : "scan.searching")
+            : "scan.emptyIdle");
     }
 
     void SetStatus(string message) => StatusText.Text = message;
@@ -590,7 +616,7 @@ public partial class MainWindow : Window
         if (_shutdownDone) return;
         e.Cancel = true;
         IsEnabled = false;
-        SetStatus("Kapatılıyor…");
+        SetStatus(Loc.T("status.closing"));
 
         // Don't let a stuck Bluetooth call keep the window open forever
         await Task.WhenAny(ShutdownAsync(), Task.Delay(TimeSpan.FromSeconds(4)));

@@ -75,7 +75,7 @@ public sealed partial class OverlayServer : IAsyncDisposable
             if (path == "/ws")
             {
                 if (ctx.Request.IsWebSocketRequest) await ServeSocketAsync(ctx);
-                else Write(ctx, 400, "text/plain; charset=utf-8", "WebSocket bekleniyordu"u8.ToArray());
+                else Write(ctx, 400, "text/plain; charset=utf-8", "WebSocket expected"u8.ToArray());
                 return;
             }
             if (path == "/api/state")
@@ -93,7 +93,7 @@ public sealed partial class OverlayServer : IAsyncDisposable
             };
             var content = SafeFileName().IsMatch(file) ? ReadAsset(file) : null;
             if (content == null)
-                Write(ctx, 404, "text/plain; charset=utf-8", "Bulunamadı"u8.ToArray());
+                Write(ctx, 404, "text/plain; charset=utf-8", "Not found"u8.ToArray());
             else
                 Write(ctx, 200, ContentType(file), content);
         }

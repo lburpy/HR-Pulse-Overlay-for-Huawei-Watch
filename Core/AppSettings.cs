@@ -19,6 +19,8 @@ public sealed class AppSettings
     static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
     public int Port { get; set; } = 8790;
+    /// <summary>"tr" or "en"; empty = follow the Windows language.</summary>
+    public string? Language { get; set; }
     public List<SavedDevice> Devices { get; set; } = [];
 
     static string FolderPath =>

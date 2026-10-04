@@ -45,7 +45,7 @@ public sealed class BleScanner : IDisposable
             }
             catch (Exception ex)
             {
-                Failed?.Invoke($"Bluetooth taraması başlatılamadı: {ex.Message}");
+                Failed?.Invoke(Loc.F("scan.err.start", ex.Message));
             }
         }
     }
@@ -82,10 +82,10 @@ public sealed class BleScanner : IDisposable
         }
         Failed?.Invoke(args.Error switch
         {
-            BluetoothError.RadioNotAvailable => "Bluetooth kapalı ya da bulunamadı. Windows'ta Bluetooth'u aç.",
-            BluetoothError.DisabledByPolicy or BluetoothError.DisabledByUser => "Bluetooth erişimi Windows ayarlarında kapalı.",
-            BluetoothError.ResourceInUse => "Bluetooth başka bir uygulama tarafından kullanılıyor.",
-            _ => $"Bluetooth taraması durdu ({args.Error})."
+            BluetoothError.RadioNotAvailable => Loc.T("scan.err.radio"),
+            BluetoothError.DisabledByPolicy or BluetoothError.DisabledByUser => Loc.T("scan.err.policy"),
+            BluetoothError.ResourceInUse => Loc.T("scan.err.busy"),
+            _ => Loc.F("scan.err.other", args.Error)
         });
     }
 

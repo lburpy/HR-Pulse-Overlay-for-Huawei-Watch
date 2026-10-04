@@ -108,29 +108,28 @@ public sealed class DeviceRowVm(string id, string name, bool isSimulated) : Obse
     public int AllTimeMax { get; private set; }
 
     public string BpmText => State == "live" && Bpm > 0 ? Bpm.ToString() : "--";
-    public string ToggleText => IsActive ? "Kes" : "Bağlan";
+    public string ToggleText => Loc.T(IsActive ? "row.disconnect" : "row.connect");
     public Visibility ControlsVisibility => IsSimulated ? Visibility.Collapsed : Visibility.Visible;
     public Brush StateBrush => Palette.ForState(State);
 
-    public string ShortStateText => State switch
+    public string ShortStateText => Loc.T(State switch
     {
-        "live" => "Canlı",
-        "waiting" => "Veri bekleniyor",
-        "connecting" => "Bağlanıyor",
-        "lost" => "Sinyal yok",
-        "reconnecting" => "Yeniden bağlanıyor",
-        _ => "Bağlı değil"
-    };
+        "live" or "waiting" or "connecting" or "lost" or "reconnecting" => "state." + State,
+        _ => "state.off"
+    });
 
     public string StateText => State switch
     {
-        "live" => IsSimulated ? "Canlı · sahte veri" : $"Canlı · {Id}",
-        "waiting" => "Bağlandı · saatten veri bekleniyor",
-        "connecting" => "Bağlanıyor…",
-        "lost" => "Sinyal yok · veri bekleniyor",
-        "reconnecting" => $"Yeniden bağlanıyor · {Attempt}. deneme" + (LastError is { } e ? $" · {e}" : ""),
-        _ => IsActive ? "Başlatılıyor…" : "Bağlı değil"
+        "live" => IsSimulated ? Loc.T("stateLong.liveSim") : Loc.F("stateLong.live", Id),
+        "waiting" => Loc.T("stateLong.waiting"),
+        "connecting" => Loc.T("stateLong.connecting"),
+        "lost" => Loc.T("stateLong.lost"),
+        "reconnecting" => Loc.F("stateLong.reconnecting", Attempt) + (LastError is { } e ? $" · {e}" : ""),
+        _ => Loc.T(IsActive ? "stateLong.starting" : "stateLong.off")
     };
+
+    /// <summary>Re-reads every translated text after a language switch.</summary>
+    public void RefreshTexts() => RaiseState();
 
     public void Apply(DeviceView view)
     {

@@ -121,7 +121,7 @@ public sealed class DeviceConnection : IAsyncDisposable
                     isRandom ? BluetoothAddressType.Random : BluetoothAddressType.Public).AsTask(ct)
                 : await BluetoothLEDevice.FromBluetoothAddressAsync(address).AsTask(ct);
             if (_device is null)
-                return Fail("Saat bulunamadı (kapsama dışında ya da HR yayını kapalı)", step);
+                return Fail(Loc.T("err.notFound"), step);
             Log.Write($"{Name}: device opened, status {_device.ConnectionStatus}, type {_device.BluetoothAddressType}");
             _device.ConnectionStatusChanged += OnConnectionStatusChanged;
 
@@ -143,18 +143,18 @@ public sealed class DeviceConnection : IAsyncDisposable
             var services = await _device.GetGattServicesForUuidAsync(
                 GattServiceUuids.HeartRate, BluetoothCacheMode.Uncached).AsTask(ct);
             if (services.Status == GattCommunicationStatus.Unreachable)
-                return Fail("Saate ulaşılamadı, saatte HR veri yayını açık mı?", step);
+                return Fail(Loc.T("err.unreachableHr"), step);
             if (services.Status != GattCommunicationStatus.Success)
-                return Fail($"Saate ulaşılamadı ({Describe(services.Status)})", step);
+                return Fail(Loc.F("err.unreachable", Describe(services.Status)), step);
             if (services.Services.Count == 0)
-                return Fail("Nabız servisi yok, saatte HR veri yayını açık mı?", step);
+                return Fail(Loc.T("err.noService"), step);
             _service = services.Services[0];
 
             step = "characteristics";
             var chars = await _service.GetCharacteristicsForUuidAsync(
                 GattCharacteristicUuids.HeartRateMeasurement, BluetoothCacheMode.Uncached).AsTask(ct);
             if (chars.Status != GattCommunicationStatus.Success || chars.Characteristics.Count == 0)
-                return Fail("Nabız ölçüm verisi bulunamadı", step);
+                return Fail(Loc.T("err.noCharacteristic"), step);
             _characteristic = chars.Characteristics[0];
             _characteristic.ValueChanged += OnValueChanged;
 
@@ -162,7 +162,7 @@ public sealed class DeviceConnection : IAsyncDisposable
             var cccd = await _characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
                 GattClientCharacteristicConfigurationDescriptorValue.Notify).AsTask(ct);
             if (cccd != GattCommunicationStatus.Success)
-                return Fail($"Bildirimler açılamadı ({Describe(cccd)})", step);
+                return Fail(Loc.F("err.notify", Describe(cccd)), step);
 
             // Learn the address type so it can be saved and used for the next start
             lock (_gate) RandomAddress = _device.BluetoothAddressType == BluetoothAddressType.Random;
@@ -184,11 +184,11 @@ public sealed class DeviceConnection : IAsyncDisposable
     /// <summary>Turns the common WinRT Bluetooth errors into something a user can act on.</summary>
     static string Describe(Exception ex) => (uint)ex.HResult switch
     {
-        0x80070002 => "Saat bağlantıyı kabul etmedi, saatte HR veri yayını açık mı?",
-        0x8007048F => "Saat kapsama dışında",
-        0x80070490 => "Saat bulunamadı",
-        0x800710DF => "Bluetooth kapalı",
-        0x80000013 => "Bağlantı kapandı",
+        0x80070002 => Loc.T("err.refused"),
+        0x8007048F => Loc.T("err.outOfRange"),
+        0x80070490 => Loc.T("err.notFoundShort"),
+        0x800710DF => Loc.T("err.btOff"),
+        0x80000013 => Loc.T("err.closed"),
         _ => ex.Message.Trim().TrimEnd('.')
     };
 
@@ -209,7 +209,7 @@ public sealed class DeviceConnection : IAsyncDisposable
                 await Pause(DropGracePeriod, ct);
                 if (_device?.ConnectionStatus != BluetoothConnectionStatus.Connected)
                 {
-                    LastError = "Bağlantı koptu";
+                    LastError = Loc.T("err.dropped");
                     return;
                 }
             }
@@ -219,7 +219,7 @@ public sealed class DeviceConnection : IAsyncDisposable
             long silence = Environment.TickCount64 - (last == 0 ? connectedAt : last);
             if (silence >= ReconnectAfterSilence.TotalMilliseconds)
             {
-                LastError = last == 0 ? "Saatten veri gelmedi" : "Veri akışı durdu";
+                LastError = Loc.T(last == 0 ? "err.noData" : "err.dataStopped");
                 return;
             }
             if (last != 0 && silence >= SignalLostAfter.TotalMilliseconds)
@@ -305,9 +305,9 @@ public sealed class DeviceConnection : IAsyncDisposable
 
     static string Describe(GattCommunicationStatus status) => status switch
     {
-        GattCommunicationStatus.Unreachable => "erişilemiyor",
-        GattCommunicationStatus.AccessDenied => "erişim reddedildi",
-        GattCommunicationStatus.ProtocolError => "protokol hatası",
+        GattCommunicationStatus.Unreachable => Loc.T("gatt.unreachable"),
+        GattCommunicationStatus.AccessDenied => Loc.T("gatt.denied"),
+        GattCommunicationStatus.ProtocolError => Loc.T("gatt.protocol"),
         _ => status.ToString()
     };
 

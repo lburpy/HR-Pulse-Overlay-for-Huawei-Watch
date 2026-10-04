@@ -4,7 +4,7 @@ namespace PulseOverlay.Core;
 public sealed class Simulator : IDisposable
 {
     public const string DeviceId = "SIM";
-    public const string DeviceName = "Simülatör";
+    public static string DeviceName => Loc.T("sim.label");
 
     readonly object _gate = new();
     readonly HeartRateHub _hub;

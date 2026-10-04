@@ -1,5 +1,7 @@
 # Pulse Overlay
 
+**Türkçe** · [English](README.en.md)
+
 Huawei saatinden (Watch Fit 5 ve standart BLE nabız servisi sunan her cihaz) canlı nabzı okuyup
 OBS'te özelleştirilebilir bir overlay olarak gösteren Windows uygulaması.
 
@@ -14,6 +16,7 @@ OBS'te özelleştirilebilir bir overlay olarak gösteren Windows uygulaması.
   (açılışta kendiliğinden bağlanmaz).
 - Huawei saatler HR yayınında ayrı bir adresle görünür; bağlantı koparsa uygulama saati bu
   adresten de tanıyıp yeniden bağlanır.
+- Overlay her durumu gösterir: Canlı / Sinyal yok / Yeniden bağlanıyor / Bağlı değil / Uygulama kapalı.
 - Bağlantı adımları ve hatalar `%APPDATA%\PulseOverlay\log.txt` dosyasına yazılır.
 
 **Korku anı ve rekorlar**
@@ -21,7 +24,6 @@ OBS'te özelleştirilebilir bir overlay olarak gösteren Windows uygulaması.
 - Yayın rekoru (ilk 2 dakikadan sonra, ortalamanın 15 üstünde) ve tüm zamanların rekoru için
   altın rozet. Tüm zamanların rekoru yalnızca bu bilgisayarda, `%APPDATA%\PulseOverlay\records.json`
   dosyasında tutulur; "Rekoru sıfırla" ile silinir. "Yeni yayın başlat" yayın rekorunu ve sayacı sıfırlar.
-- Overlay her durumu gösterir: Canlı / Sinyal yok / Yeniden bağlanıyor / Bağlı değil / Uygulama kapalı.
 
 **Overlay**
 - 5 tema: Kart, Sade (oyun üstü), Neon, Gösterge (dairesel), EKG monitörü
@@ -30,7 +32,11 @@ OBS'te özelleştirilebilir bir overlay olarak gösteren Windows uygulaması.
 - Kalp atışı nabızla senkron atar; sayı yumuşak geçer
 - Uyarı eşiği: nabız X'i geçince parlama ve/veya titreme
 - Sinyal yokken overlay'i otomatik gizleme
-- Türkçe / İngilizce; internet gerektirmez (sistem fontları, SVG kalp)
+- İnternet gerektirmez (sistem fontları, SVG kalp)
+
+**Dil**
+- Uygulama, overlay düzenleyici ve overlay Türkçe ve İngilizce. Uygulamada sağ üstteki listeden,
+  düzenleyicide TR / EN düğmesinden değiştirilir. İlk açılışta Windows'un dili kullanılır.
 
 ## Kullanım
 
@@ -53,7 +59,7 @@ Saat olmadan denemek için uygulamada **Simülatör**'ü aç ya da düzenleyicid
 | `ws://localhost:8790/ws` | Canlı veri akışı |
 
 Overlay seçenekleri URL parametreleridir (`theme`, `color`, `accent`, `graph`, `stats`, `zonebar`,
-`maxhr`, `alert`, `hideoff` …); hepsini düzenleyici üretir.
+`maxhr`, `alert`, `hideoff`, `lang` …); hepsini düzenleyici üretir.
 Ayarlar `%APPDATA%\PulseOverlay\settings.json` dosyasında tutulur.
 
 ## Derleme
@@ -76,11 +82,15 @@ Overlay/düzenleyici dosyalarını değiştirirken yeniden derlemeden denemek i�
 Core/
   DeviceConnection.cs   Tek saat bağlantısı: bağlan, dinle, kopunca yeniden dene
   BleScanner.cs         Tarama + yeniden bağlanırken arka planda saati bekleme
+  WatchIdentity.cs      Saati farklı adres/ad ile göründüğünde tanıma (Huawei HR yayını)
   HeartRateParser.cs    Bluetooth nabız paketini (0x2A37) çözme
-  HeartRateHub.cs       Tüm cihazların durumu, istatistik, geçmiş → overlay mesajları
+  HeartRateHub.cs       Durum, istatistik, geçmiş, korku anı ve rekorlar → overlay mesajları
+  RecordStore.cs        Tüm zamanların rekoru (records.json)
   Simulator.cs          Sahte nabız kaynağı
-  AppSettings.cs        Kayıtlı saatler
+  AppSettings.cs        Kayıtlı saatler ve dil
+  Log.cs                Tanılama günlüğü (log.txt)
 Server/OverlayServer.cs Tek port: overlay, düzenleyici, JSON API, WebSocket
 wwwroot/                overlay.html/css/js, editor.html/css/js (EXE'ye gömülü)
+Loc.cs                  Uygulama metinleri (Türkçe / İngilizce)
 MainWindow.xaml(.cs)    Kontrol paneli
 ```

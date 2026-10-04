@@ -4,12 +4,88 @@
 
   const STORAGE_KEY = 'pulseoverlay.editor.v1';
 
+  // ── Interface language ─────────────────────────────────────────────
+  const UI_KEY = 'pulseoverlay.editor.ui';
+  const I18N = {
+    tr: {
+      title: 'Overlay Düzenleyici', presets: 'Hazır şablonlar', reset: 'Varsayılanlara dön',
+      previewData: 'Önizleme verisi', state: 'Durum', background: 'Arka plan', watch: 'Saat',
+      autoWatch: 'Otomatik (aktif saat)', copy: 'Adresi kopyala', copied: 'Kopyalandı ✓', urlLabel: 'OBS adresi',
+      size: 'Önerilen OBS boyutu: {0}', previewTitle: 'Overlay önizleme',
+      howto: 'OBS → Kaynaklar → <b>+</b> → <b>Tarayıcı</b> → adresi yapıştır, genişlik ve yüksekliği önerilen boyuta ayarla.',
+      stLive: 'Canlı', stLost: 'Sinyal yok', stReconnecting: 'Yeniden bağlanıyor', stOff: 'Bağlı değil',
+      demoData: 'Demo veri', liveData: 'Canlı', bgChecker: 'Damalı', bgGame: 'Oyun', bgDark: 'Koyu', bgLight: 'Açık',
+      thCard: 'Kart', thMinimal: 'Sade', thNeon: 'Neon', thRing: 'Gösterge', thEcg: 'EKG',
+      prClassic: 'Klasik kart', prCorner: 'Yayın köşesi', prGaming: 'Oyun (sade)', prNeon: 'Neon', prGauge: 'Gösterge', prEcg: 'EKG monitörü',
+      zone1: 'Isınma', zone2: 'Yağ yakımı', zone3: 'Aerobik', zone4: 'Anaerobik', zone5: 'Maksimum',
+      secTheme: 'Tema', secLook: 'Görünüm', secColors: 'Renkler', secParts: 'Bileşenler',
+      secEvents: 'Korku anı ve rekorlar', secZones: 'Nabız bölgeleri', secEffects: 'Efektler',
+      font: 'Yazı tipi', scale: 'Boyut', bg: 'Arka plan opaklığı', radius: 'Köşe yuvarlaklığı',
+      align: 'Hizalama', left: 'Sol', center: 'Orta', right: 'Sağ',
+      colorMode: 'Renk modu', byZone: 'Nabız bölgesine göre', fixed: 'Sabit renk',
+      accent: 'Vurgu rengi', accentHint: 'Bölge modunda sadece bağlantı yokken kullanılır.', text: 'Yazı rengi',
+      beat: 'Kalp atışı animasyonu', tween: 'Yumuşak sayı geçişi', graph: 'Canlı nabız grafiği',
+      window: 'Grafik süresi', s30: '30 saniye', m1: '1 dakika', m2: '2 dakika', m5: '5 dakika',
+      stats: 'Min / Ort / Maks', zonebar: 'Bölge çubuğu', zname: 'Bölge adı', name: 'Saat adı', dot: 'Bağlantı noktası',
+      label: 'Birim yazısı', lang: 'Overlay dili',
+      scare: 'Korku anı efekti (😱 Korktu!)', scarecount: 'Korku sayacını göster', record: 'Rekor kutlaması',
+      recOff: 'Kapalı', recSession: 'Yayın', recAll: 'Tüm zamanlar', recBoth: 'İkisi',
+      testScare: '😱 Korkuyu dene', testRecord: '🏆 Rekoru dene',
+      eventsInfo: 'Korku anı: nabız ~10 saniyede 20+ artarsa. Yayın rekoru ilk 2 dakikadan sonra ve ortalamanın 15 üstündeyse kutlanır. Tüm zamanların rekoru bilgisayarında saklanır (records.json); sıfırlamak için uygulamadaki “Rekoru sıfırla”.',
+      maxhr: 'Maksimum nabız', age: 'Yaşın', fromAge: 'Yaştan hesapla', maxhrHint: 'Bilmiyorsan yaklaşık değer: 220 − yaşın.',
+      alert: 'Uyarı eşiği (BPM)', alertHint: '0 = kapalı. Nabız bu değeri geçince efekt devreye girer.',
+      alertfx: 'Uyarı efekti', flash: 'Parlama', shake: 'Titreme', both: 'İkisi', hideoff: 'Sinyal yokken overlay’i gizle',
+    },
+    en: {
+      title: 'Overlay Editor', presets: 'Presets', reset: 'Reset to defaults',
+      previewData: 'Preview data', state: 'State', background: 'Background', watch: 'Watch',
+      autoWatch: 'Automatic (active watch)', copy: 'Copy URL', copied: 'Copied ✓', urlLabel: 'OBS URL',
+      size: 'Suggested OBS size: {0}', previewTitle: 'Overlay preview',
+      howto: 'OBS → Sources → <b>+</b> → <b>Browser</b> → paste the URL, set width and height to the suggested size.',
+      stLive: 'Live', stLost: 'No signal', stReconnecting: 'Reconnecting', stOff: 'Not connected',
+      demoData: 'Demo data', liveData: 'Live', bgChecker: 'Checker', bgGame: 'Game', bgDark: 'Dark', bgLight: 'Light',
+      thCard: 'Card', thMinimal: 'Minimal', thNeon: 'Neon', thRing: 'Gauge', thEcg: 'ECG',
+      prClassic: 'Classic card', prCorner: 'Stream corner', prGaming: 'Gaming (minimal)', prNeon: 'Neon', prGauge: 'Gauge', prEcg: 'ECG monitor',
+      zone1: 'Warm-up', zone2: 'Fat burn', zone3: 'Aerobic', zone4: 'Anaerobic', zone5: 'Maximum',
+      secTheme: 'Theme', secLook: 'Appearance', secColors: 'Colors', secParts: 'Components',
+      secEvents: 'Scare moments & records', secZones: 'Heart rate zones', secEffects: 'Effects',
+      font: 'Font', scale: 'Size', bg: 'Background opacity', radius: 'Corner radius',
+      align: 'Alignment', left: 'Left', center: 'Center', right: 'Right',
+      colorMode: 'Color mode', byZone: 'By heart rate zone', fixed: 'Fixed color',
+      accent: 'Accent color', accentHint: 'In zone mode it is only used while disconnected.', text: 'Text color',
+      beat: 'Heartbeat animation', tween: 'Smooth number changes', graph: 'Live heart rate graph',
+      window: 'Graph length', s30: '30 seconds', m1: '1 minute', m2: '2 minutes', m5: '5 minutes',
+      stats: 'Min / Avg / Max', zonebar: 'Zone bar', zname: 'Zone name', name: 'Watch name', dot: 'Connection dot',
+      label: 'Unit label', lang: 'Overlay language',
+      scare: 'Scare moment effect (😱 Scared!)', scarecount: 'Show scare counter', record: 'Record celebration',
+      recOff: 'Off', recSession: 'Stream', recAll: 'All-time', recBoth: 'Both',
+      testScare: '😱 Try scare', testRecord: '🏆 Try record',
+      eventsInfo: 'Scare moment: heart rate rises 20+ within ~10 seconds. A stream record is celebrated after the first 2 minutes and when it is 15 above the average. The all-time record is stored on your computer (records.json); reset it with “Reset record” in the app.',
+      maxhr: 'Maximum heart rate', age: 'Your age', fromAge: 'From age', maxhrHint: 'Not sure? Roughly 220 − your age.',
+      alert: 'Alert threshold (BPM)', alertHint: '0 = off. The effect kicks in when heart rate goes above this.',
+      alertfx: 'Alert effect', flash: 'Flash', shake: 'Shake', both: 'Both', hideoff: 'Hide the overlay while there is no signal',
+    },
+  };
+
+  function detectUi() {
+    const fromUrl = new URLSearchParams(location.search).get('ui');
+    if (fromUrl === 'tr' || fromUrl === 'en') return fromUrl;
+    try {
+      const saved = localStorage.getItem(UI_KEY);
+      if (saved === 'tr' || saved === 'en') return saved;
+    } catch { /* storage unavailable */ }
+    return (navigator.language || '').toLowerCase().startsWith('tr') ? 'tr' : 'en';
+  }
+  const uiLang = detectUi();
+  try { localStorage.setItem(UI_KEY, uiLang); } catch { /* ignore */ }
+  const t = key => I18N[uiLang][key] ?? I18N.tr[key] ?? key;
+
   const THEMES = [
-    { id: 'card', name: 'Kart', ico: '▭' },
-    { id: 'minimal', name: 'Sade', ico: '♥' },
-    { id: 'neon', name: 'Neon', ico: '✦' },
-    { id: 'ring', name: 'Gösterge', ico: '◔' },
-    { id: 'ecg', name: 'EKG', ico: '〰' },
+    { id: 'card', name: t('thCard'), ico: '▭' },
+    { id: 'minimal', name: t('thMinimal'), ico: '♥' },
+    { id: 'neon', name: t('thNeon'), ico: '✦' },
+    { id: 'ring', name: t('thRing'), ico: '◔' },
+    { id: 'ecg', name: t('thEcg'), ico: '〰' },
   ];
   const GRAPH_THEMES = ['card', 'minimal', 'neon'];
 
@@ -25,69 +101,66 @@
   });
 
   const PRESETS = [
-    { name: 'Klasik kart', v: { theme: 'card' } },
-    { name: 'Yayın köşesi', v: { theme: 'card', stats: true, zonebar: true, name: true } },
-    { name: 'Oyun (sade)', v: { theme: 'minimal', scale: 1.2 } },
-    { name: 'Neon', v: { theme: 'neon', color: 'accent', accent: '#00e5ff', bg: 80 } },
-    { name: 'Gösterge', v: { theme: 'ring', stats: true } },
-    { name: 'EKG monitörü', v: { theme: 'ecg', color: 'accent', accent: '#39ff88', font: 'consolas', bg: 85, radius: 10 } },
+    { name: t('prClassic'), v: { theme: 'card' } },
+    { name: t('prCorner'), v: { theme: 'card', stats: true, zonebar: true, name: true } },
+    { name: t('prGaming'), v: { theme: 'minimal', scale: 1.2 } },
+    { name: t('prNeon'), v: { theme: 'neon', color: 'accent', accent: '#00e5ff', bg: 80 } },
+    { name: t('prGauge'), v: { theme: 'ring', stats: true } },
+    { name: t('prEcg'), v: { theme: 'ecg', color: 'accent', accent: '#39ff88', font: 'consolas', bg: 85, radius: 10 } },
   ];
 
   const ZONE_INFO = [
-    ['Isınma', 0.5, 0.6, '#38bdf8'],
-    ['Yağ yakımı', 0.6, 0.7, '#22c55e'],
-    ['Aerobik', 0.7, 0.8, '#facc15'],
-    ['Anaerobik', 0.8, 0.9, '#fb923c'],
-    ['Maksimum', 0.9, 1.0, '#ef4444'],
+    [t('zone1'), 0.5, 0.6, '#38bdf8'],
+    [t('zone2'), 0.6, 0.7, '#22c55e'],
+    [t('zone3'), 0.7, 0.8, '#facc15'],
+    [t('zone4'), 0.8, 0.9, '#fb923c'],
+    [t('zone5'), 0.9, 1.0, '#ef4444'],
   ];
 
   const SECTIONS = [
-    { title: 'Tema', items: [{ key: 'theme', type: 'themes' }] },
-    { title: 'Görünüm', items: [
-      { key: 'font', type: 'select', label: 'Yazı tipi', options: [
+    { title: t('secTheme'), items: [{ key: 'theme', type: 'themes' }] },
+    { title: t('secLook'), items: [
+      { key: 'font', type: 'select', label: t('font'), options: [
         ['bahnschrift', 'Bahnschrift'], ['segoe', 'Segoe UI'], ['consolas', 'Mono (Cascadia)'],
         ['impact', 'Impact'], ['arialblack', 'Arial Black'], ['georgia', 'Georgia']] },
-      { key: 'scale', type: 'range', label: 'Boyut', min: 0.5, max: 3, step: 0.05, fmt: v => `%${Math.round(v * 100)}` },
-      { key: 'bg', type: 'range', label: 'Arka plan opaklığı', min: 0, max: 100, step: 1, fmt: v => `%${v}` },
-      { key: 'radius', type: 'range', label: 'Köşe yuvarlaklığı', min: 0, max: 40, step: 1, fmt: v => `${v} px` },
-      { key: 'align', type: 'segment', label: 'Hizalama', options: [['left', 'Sol'], ['center', 'Orta'], ['right', 'Sağ']] },
+      { key: 'scale', type: 'range', label: t('scale'), min: 0.5, max: 3, step: 0.05, fmt: v => `${Math.round(v * 100)}%` },
+      { key: 'bg', type: 'range', label: t('bg'), min: 0, max: 100, step: 1, fmt: v => `${v}%` },
+      { key: 'radius', type: 'range', label: t('radius'), min: 0, max: 40, step: 1, fmt: v => `${v} px` },
+      { key: 'align', type: 'segment', label: t('align'), options: [['left', t('left')], ['center', t('center')], ['right', t('right')]] },
     ] },
-    { title: 'Renkler', items: [
-      { key: 'color', type: 'segment', label: 'Renk modu', options: [['zone', 'Nabız bölgesine göre'], ['accent', 'Sabit renk']] },
-      { key: 'accent', type: 'color', label: 'Vurgu rengi', hint: s => (s.color === 'zone' ? 'Bölge modunda sadece bağlantı yokken kullanılır.' : '') },
-      { key: 'text', type: 'color', label: 'Yazı rengi' },
+    { title: t('secColors'), items: [
+      { key: 'color', type: 'segment', label: t('colorMode'), options: [['zone', t('byZone')], ['accent', t('fixed')]] },
+      { key: 'accent', type: 'color', label: t('accent'), hint: s => (s.color === 'zone' ? t('accentHint') : '') },
+      { key: 'text', type: 'color', label: t('text') },
     ] },
-    { title: 'Bileşenler', items: [
-      { key: 'beat', type: 'check', label: 'Kalp atışı animasyonu' },
-      { key: 'tween', type: 'check', label: 'Yumuşak sayı geçişi' },
-      { key: 'graph', type: 'check', label: 'Canlı nabız grafiği', enabled: s => GRAPH_THEMES.includes(s.theme) },
-      { key: 'window', type: 'select', label: 'Grafik süresi', options: [['30', '30 saniye'], ['60', '1 dakika'], ['120', '2 dakika'], ['300', '5 dakika']],
+    { title: t('secParts'), items: [
+      { key: 'beat', type: 'check', label: t('beat') },
+      { key: 'tween', type: 'check', label: t('tween') },
+      { key: 'graph', type: 'check', label: t('graph'), enabled: s => GRAPH_THEMES.includes(s.theme) },
+      { key: 'window', type: 'select', label: t('window'), options: [['30', t('s30')], ['60', t('m1')], ['120', t('m2')], ['300', t('m5')]],
         enabled: s => GRAPH_THEMES.includes(s.theme) && s.graph },
-      { key: 'stats', type: 'check', label: 'Min / Ort / Maks' },
-      { key: 'zonebar', type: 'check', label: 'Bölge çubuğu' },
-      { key: 'zname', type: 'check', label: 'Bölge adı' },
-      { key: 'name', type: 'check', label: 'Saat adı' },
-      { key: 'dot', type: 'check', label: 'Bağlantı noktası', enabled: s => s.theme !== 'minimal' },
-      { key: 'label', type: 'text', label: 'Birim yazısı', maxlength: 16 },
-      { key: 'lang', type: 'segment', label: 'Overlay dili', options: [['tr', 'Türkçe'], ['en', 'English']] },
+      { key: 'stats', type: 'check', label: t('stats') },
+      { key: 'zonebar', type: 'check', label: t('zonebar') },
+      { key: 'zname', type: 'check', label: t('zname') },
+      { key: 'name', type: 'check', label: t('name') },
+      { key: 'dot', type: 'check', label: t('dot'), enabled: s => s.theme !== 'minimal' },
+      { key: 'label', type: 'text', label: t('label'), maxlength: 16 },
+      { key: 'lang', type: 'segment', label: t('lang'), options: [['tr', 'Türkçe'], ['en', 'English']] },
     ] },
-    { title: 'Korku anı ve rekorlar', items: [
-      { key: 'scare', type: 'check', label: 'Korku anı efekti (😱 Korktu!)' },
-      { key: 'scarecount', type: 'check', label: 'Korku sayacını göster', enabled: s => s.scare },
-      { key: 'record', type: 'segment', label: 'Rekor kutlaması',
-        options: [['off', 'Kapalı'], ['session', 'Yayın'], ['alltime', 'Tüm zamanlar'], ['both', 'İkisi']] },
+    { title: t('secEvents'), items: [
+      { key: 'scare', type: 'check', label: t('scare') },
+      { key: 'scarecount', type: 'check', label: t('scarecount'), enabled: s => s.scare },
+      { key: 'record', type: 'segment', label: t('record'),
+        options: [['off', t('recOff')], ['session', t('recSession')], ['alltime', t('recAll')], ['both', t('recBoth')]] },
       { key: '_test', type: 'test' },
-      { key: '_info', type: 'info', text: 'Korku anı: nabız ~10 saniyede 20+ artarsa. Yayın rekoru ilk 2 dakikadan sonra ve '
-          + 'ortalamanın 15 üstündeyse kutlanır. Tüm zamanların rekoru bilgisayarında saklanır (records.json); '
-          + 'sıfırlamak için uygulamadaki “Rekoru sıfırla”.' },
+      { key: '_info', type: 'info', text: t('eventsInfo') },
     ] },
-    { title: 'Nabız bölgeleri', items: [{ key: 'maxhr', type: 'maxhr', label: 'Maksimum nabız' }] },
-    { title: 'Efektler', items: [
-      { key: 'alert', type: 'number', label: 'Uyarı eşiği (BPM)', min: 0, max: 250,
-        hint: () => '0 = kapalı. Nabız bu değeri geçince efekt devreye girer.' },
-      { key: 'alertfx', type: 'segment', label: 'Uyarı efekti', options: [['flash', 'Parlama'], ['shake', 'Titreme'], ['both', 'İkisi']],
+    { title: t('secZones'), items: [{ key: 'maxhr', type: 'maxhr', label: t('maxhr') }] },
+    { title: t('secEffects'), items: [
+      { key: 'alert', type: 'number', label: t('alert'), min: 0, max: 250, hint: () => t('alertHint') },
+      { key: 'alertfx', type: 'segment', label: t('alertfx'), options: [['flash', t('flash')], ['shake', t('shake')], ['both', t('both')]],
         enabled: s => s.alert > 0 },
-      { key: 'hideoff', type: 'check', label: 'Sinyal yokken overlay’i gizle' },
+      { key: 'hideoff', type: 'check', label: t('hideoff') },
     ] },
   ];
 
@@ -108,6 +181,9 @@
       if (saved && saved.state) {
         state = { ...DEFAULTS(saved.state.theme || 'card'), ...saved.state };
         Object.assign(preview, saved.preview || {});
+      } else {
+        // First visit: the overlay speaks the editor's language
+        state.lang = uiLang;
       }
     } catch { /* storage unavailable */ }
   }
@@ -176,7 +252,7 @@
       if (!r.width) return;
       const W = Math.ceil((r.width + 56) / 10) * 10;
       const H = Math.ceil((r.height + 56) / 10) * 10;
-      $('#size').textContent = `Önerilen OBS boyutu: ${W} × ${H}`;
+      $('#size').textContent = t('size').replace('{0}', `${W} × ${H}`);
     } catch { /* frame not ready */ }
   }, 500);
 
@@ -301,8 +377,8 @@
         const fire = kind => {
           if (frameReady) frame.contentWindow.postMessage({ type: 'pulse-test', kind }, location.origin);
         };
-        const scare = el('button', { type: 'button', class: 'btn', onclick: () => fire('scare') }, '😱 Korkuyu dene');
-        const record = el('button', { type: 'button', class: 'btn', onclick: () => fire('record') }, '🏆 Rekoru dene');
+        const scare = el('button', { type: 'button', class: 'btn', onclick: () => fire('scare') }, t('testScare'));
+        const record = el('button', { type: 'button', class: 'btn', onclick: () => fire('record') }, t('testRecord'));
         refreshers.push(() => {
           scare.disabled = !state.scare;
           record.disabled = state.record === 'off';
@@ -313,7 +389,7 @@
         return el('div', { class: 'field hint' }, item.text);
       case 'maxhr': {
         const input = el('input', { id, type: 'number', min: 120, max: 230, value: state.maxhr });
-        const age = el('input', { type: 'number', min: 10, max: 90, placeholder: 'Yaşın', 'aria-label': 'Yaş' });
+        const age = el('input', { type: 'number', min: 10, max: 90, placeholder: t('age'), 'aria-label': t('age') });
         const zones = el('div', { class: 'zones' });
         const paintZones = () => {
           zones.replaceChildren();
@@ -331,10 +407,10 @@
             const a = Number(age.value);
             if (a >= 10 && a <= 90) { input.value = 220 - a; set('maxhr', 220 - a); paintZones(); }
           },
-        }, 'Yaştan hesapla');
+        }, t('fromAge'));
         paintZones();
         return field(item, input, el('div', { class: 'agerow' }, age, calc),
-          el('div', { class: 'hint' }, 'Bilmiyorsan yaklaşık değer: 220 − yaşın.'), zones);
+          el('div', { class: 'hint' }, t('maxhrHint')), zones);
       }
     }
     return el('div');
@@ -366,7 +442,7 @@
 
   $('#reset').addEventListener('click', () => { state = DEFAULTS(state.theme); renderAll(); scheduleUpdate(); });
 
-  $('#dataSeg').append(segment([['demo', 'Demo veri'], ['live', 'Canlı']],
+  $('#dataSeg').append(segment([['demo', t('demoData')], ['live', t('liveData')]],
     () => (preview.demo ? 'demo' : 'live'),
     v => { preview.demo = v === 'demo'; scheduleUpdate(); }));
 
@@ -376,7 +452,7 @@
 
   const previewBox = $('#preview');
   const paintBg = () => { previewBox.className = 'preview bg-' + preview.bg; };
-  $('#bgSeg').append(segment([['checker', 'Damalı'], ['game', 'Oyun'], ['dark', 'Koyu'], ['light', 'Açık']],
+  $('#bgSeg').append(segment([['checker', t('bgChecker')], ['game', t('bgGame')], ['dark', t('bgDark')], ['light', t('bgLight')]],
     () => preview.bg,
     v => { preview.bg = v; paintBg(); save(); }));
   paintBg();
@@ -412,9 +488,24 @@
     const button = $('#copy'), url = $('#url');
     try { await navigator.clipboard.writeText(url.value); }
     catch { url.select(); document.execCommand('copy'); }
-    button.textContent = 'Kopyalandı ✓';
-    setTimeout(() => { button.textContent = 'Adresi kopyala'; }, 1600);
+    button.textContent = t('copied');
+    setTimeout(() => { button.textContent = t('copy'); }, 1600);
   });
+
+  // ── Static page text + interface language switch ───────────────────
+  document.documentElement.lang = uiLang;
+  document.title = `${t('title')} · Pulse Overlay`;
+  for (const node of document.querySelectorAll('[data-i18n]')) node.textContent = t(node.dataset.i18n);
+  for (const node of document.querySelectorAll('[data-i18n-html]')) node.innerHTML = t(node.dataset.i18nHtml);
+  for (const node of document.querySelectorAll('[data-i18n-title]')) node.title = t(node.dataset.i18nTitle);
+  for (const node of document.querySelectorAll('[data-i18n-aria]')) node.setAttribute('aria-label', t(node.dataset.i18nAria));
+  $('#uiLang').append(segment([['tr', 'TR'], ['en', 'EN']], () => uiLang, lang => {
+    if (lang === uiLang) return;
+    try { localStorage.setItem(UI_KEY, lang); } catch { /* ignore */ }
+    const url = new URL(location.href);
+    url.searchParams.set('ui', lang);
+    location.href = url.toString(); // settings live in localStorage, so a reload keeps them
+  }));
 
   renderAll();
   update();

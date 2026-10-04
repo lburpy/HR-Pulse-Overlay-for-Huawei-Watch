@@ -9,12 +9,13 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        Loc.Set(Core.AppSettings.Load().Language ?? Loc.DefaultLanguage());
 
         // A second copy would fight over the Bluetooth link and the server port
         _singleInstance = new Mutex(true, @"Local\PulseOverlay.SingleInstance", out bool isFirst);
         if (!isFirst)
         {
-            MessageBox.Show("Pulse Overlay zaten çalışıyor.", "Pulse Overlay",
+            MessageBox.Show(Loc.T("app.alreadyRunning"), "Pulse Overlay",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown();
             return;
@@ -22,7 +23,7 @@ public partial class App : Application
 
         DispatcherUnhandledException += (_, args) =>
         {
-            MessageBox.Show($"Beklenmeyen hata: {args.Exception.Message}", "Pulse Overlay",
+            MessageBox.Show(Loc.F("app.unexpected", args.Exception.Message), "Pulse Overlay",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;
         };

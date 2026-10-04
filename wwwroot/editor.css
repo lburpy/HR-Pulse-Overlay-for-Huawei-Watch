@@ -32,6 +32,8 @@ body {
 .brand svg { width: 30px; height: 30px; fill: var(--accent); filter: drop-shadow(0 0 8px rgba(255, 59, 92, .5)); }
 .brand h1 { font-size: 18px; margin: 0; font-weight: 600; }
 .brand p { margin: 0; color: var(--muted); font-size: 12px; }
+.brand-text { flex: 1; min-width: 0; }
+.uilang .seg button { padding: 4px 9px; font-size: 12px; }
 
 .block { margin-bottom: 18px; }
 .block h2 {

@@ -1,6 +1,7 @@
 <Window x:Class="PulseOverlay.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:PulseOverlay"
         Title="Pulse Overlay"
         Icon="Assets/heart.ico"
         Width="1000" Height="680" MinWidth="880" MinHeight="600"
@@ -23,21 +24,28 @@
                       Stretch="Uniform" VerticalAlignment="Center"/>
                 <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                     <TextBlock Text="Pulse Overlay" FontSize="20" FontWeight="SemiBold"/>
-                    <TextBlock Text="Saatinden canlı nabız → OBS overlay" Style="{StaticResource Muted}"/>
+                    <TextBlock Text="{local:L app.tagline}" Style="{StaticResource Muted}"/>
                 </StackPanel>
             </StackPanel>
-            <Border Style="{StaticResource Chip}" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <Ellipse x:Name="ServerDot" Width="8" Height="8" Fill="#6B7080" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ServerText" Text="Sunucu başlatılıyor…" FontSize="12" Margin="8,0,0,0"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text="·" Foreground="{StaticResource PoMuted}" Margin="8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="OBS bağlantısı:" FontSize="12" Foreground="{StaticResource PoMuted}"
-                               VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ObsClients" Text="0" FontSize="12" FontWeight="SemiBold" Margin="5,0,0,0"
-                               VerticalAlignment="Center"/>
-                </StackPanel>
-            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Border Style="{StaticResource Chip}" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="ServerDot" Width="8" Height="8" Fill="#6B7080" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="ServerText" Text="{local:L server.starting}" FontSize="12" Margin="8,0,0,0"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="·" Foreground="{StaticResource PoMuted}" Margin="8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{local:L obs.clients}" FontSize="12" Foreground="{StaticResource PoMuted}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock x:Name="ObsClients" Text="0" FontSize="12" FontWeight="SemiBold" Margin="5,0,0,0"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <ComboBox x:Name="LanguageBox" Margin="10,0,0,0" MinWidth="112" VerticalAlignment="Center"
+                          ToolTip="{local:L lang.tip}" SelectionChanged="LanguageBox_SelectionChanged">
+                    <ComboBoxItem Content="Türkçe" Tag="tr"/>
+                    <ComboBoxItem Content="English" Tag="en"/>
+                </ComboBox>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -62,7 +70,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock x:Name="HeroName" Text="Henüz saat eklenmedi" Style="{StaticResource SectionTitle}"
+                            <TextBlock x:Name="HeroName" Style="{StaticResource SectionTitle}"
                                        TextTrimming="CharacterEllipsis"/>
                             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                                 <Path x:Name="HeroHeart" Data="{StaticResource HeartGeometry}" Fill="{StaticResource PoAccent}"
@@ -88,19 +96,19 @@
                             <Border x:Name="HeroChip" Style="{StaticResource Chip}" HorizontalAlignment="Right">
                                 <StackPanel Orientation="Horizontal">
                                     <Ellipse x:Name="HeroDot" Width="8" Height="8" Fill="#6B7080" VerticalAlignment="Center"/>
-                                    <TextBlock x:Name="HeroState" Text="Bağlı değil" FontSize="12" FontWeight="SemiBold"
+                                    <TextBlock x:Name="HeroState" FontSize="12" FontWeight="SemiBold"
                                                Margin="7,0,0,0" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
-                            <CheckBox x:Name="SimToggle" Content="Simülatör" Margin="0,14,0,0" HorizontalAlignment="Right"
+                            <CheckBox x:Name="SimToggle" Content="{local:L sim.label}" Margin="0,14,0,0" HorizontalAlignment="Right"
                                       Checked="SimToggle_Checked" Unchecked="SimToggle_Unchecked"
-                                      ToolTip="Saat olmadan overlay'i denemek için sahte nabız üretir"/>
-                            <Button Content="Yeni yayın başlat" Style="{StaticResource SubtleAction}"
+                                      ToolTip="{local:L sim.tip}"/>
+                            <Button Content="{local:L btn.newStream}" Style="{StaticResource SubtleAction}"
                                     Margin="0,8,0,0" HorizontalAlignment="Right" Click="ResetStats_Click"
-                                    ToolTip="Min / ort / maks, grafik, yayın rekoru ve korku sayacını sıfırlar"/>
-                            <Button Content="Rekoru sıfırla" Style="{StaticResource SubtleAction}"
+                                    ToolTip="{local:L btn.newStream.tip}"/>
+                            <Button Content="{local:L btn.resetRecord}" Style="{StaticResource SubtleAction}"
                                     Margin="0,6,0,0" HorizontalAlignment="Right" Click="ResetRecords_Click"
-                                    ToolTip="Tüm zamanların rekorunu siler (records.json)"/>
+                                    ToolTip="{local:L btn.resetRecord.tip}"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -113,12 +121,11 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="KAYITLI SAATLER" Style="{StaticResource SectionTitle}"/>
-                            <TextBlock Text="Bağlantı koparsa otomatik olarak yeniden bağlanır." Style="{StaticResource Muted}"
-                                       Margin="0,2,0,0"/>
+                            <TextBlock Text="{local:L saved.title}" Style="{StaticResource SectionTitle}"/>
+                            <TextBlock Text="{local:L saved.subtitle}" Style="{StaticResource Muted}" Margin="0,2,0,0"/>
                         </StackPanel>
                         <TextBlock x:Name="EmptyRows" Grid.Row="1" Style="{StaticResource Muted}" Margin="0,8,0,0"
-                                   Text="Henüz kayıtlı saat yok. Sağdaki “Tara” ile saatini bul ve bağlan."/>
+                                   Text="{local:L saved.empty}"/>
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                             <ItemsControl x:Name="DeviceRows">
                                 <ItemsControl.ItemTemplate>
@@ -152,11 +159,12 @@
                                                             Visibility="{Binding ControlsVisibility}">
                                                     <Button Content="{Binding ToggleText}" Style="{StaticResource SubtleAction}"
                                                             MinWidth="64" Click="ToggleConnection_Click"/>
-                                                    <Button Content="Overlay adresi" Style="{StaticResource SubtleAction}" Margin="6,0,0,0"
-                                                            Click="CopyDeviceUrl_Click"
-                                                            ToolTip="Sadece bu saati gösteren overlay adresini kopyala"/>
-                                                    <Button Content="Unut" Style="{StaticResource SubtleAction}" Margin="6,0,0,0"
-                                                            Click="Forget_Click" ToolTip="Bu saati listeden kaldır"/>
+                                                    <Button Content="{local:L row.overlayUrl}" Style="{StaticResource SubtleAction}"
+                                                            Margin="6,0,0,0" Click="CopyDeviceUrl_Click"
+                                                            ToolTip="{local:L row.overlayUrl.tip}"/>
+                                                    <Button Content="{local:L row.forget}" Style="{StaticResource SubtleAction}"
+                                                            Margin="6,0,0,0" Click="Forget_Click"
+                                                            ToolTip="{local:L row.forget.tip}"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -184,19 +192,17 @@
                         </Grid.RowDefinitions>
                         <Grid Margin="0,0,0,10">
                             <StackPanel Margin="0,0,120,0">
-                                <TextBlock Text="SAAT BUL" Style="{StaticResource SectionTitle}"/>
-                                <TextBlock x:Name="ScanHint" Style="{StaticResource Muted}" Margin="0,2,0,0"
-                                           Text="Saatte: Ayarlar → HR veri yayını → Aç. Sonra “Tara”ya bas."/>
+                                <TextBlock Text="{local:L scan.title}" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock x:Name="ScanHint" Style="{StaticResource Muted}" Margin="0,2,0,0"/>
                             </StackPanel>
-                            <Button x:Name="ScanButton" Content="Tara" Style="{StaticResource AccentAction}"
+                            <Button x:Name="ScanButton" Style="{StaticResource AccentAction}"
                                     HorizontalAlignment="Right" VerticalAlignment="Top" MinWidth="96"
                                     Click="ScanButton_Click"/>
                         </Grid>
                         <Border Grid.Row="1" Background="{StaticResource PoInner}" CornerRadius="10">
                             <Grid>
                                 <TextBlock x:Name="ScanEmpty" Style="{StaticResource Muted}" Margin="16"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"
-                                           Text="Bulunan cihazlar burada listelenir."/>
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
                                 <ListBox x:Name="ScanList" Background="Transparent" BorderThickness="0"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          SelectionChanged="ScanList_SelectionChanged"
@@ -215,11 +221,11 @@
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                                     <Border Style="{StaticResource Chip}" Padding="7,2" Margin="0,0,6,0"
                                                             Visibility="{Binding SavedVisibility}">
-                                                        <TextBlock Text="Kayıtlı" FontSize="11"/>
+                                                        <TextBlock Text="{local:L scan.saved}" FontSize="11"/>
                                                     </Border>
                                                     <Border Style="{StaticResource Chip}" Padding="7,2" Margin="0,0,8,0"
                                                             Background="#33FF3B5C" Visibility="{Binding HeartRateVisibility}">
-                                                        <TextBlock Text="♥ Nabız" FontSize="11" Foreground="#FF8DA1"/>
+                                                        <TextBlock Text="{local:L scan.hr}" FontSize="11" Foreground="#FF8DA1"/>
                                                     </Border>
                                                     <TextBlock Text="{Binding SignalText}" FontSize="12" Width="34"
                                                                Foreground="{StaticResource PoMuted}" ToolTip="{Binding Rssi}"/>
@@ -231,10 +237,10 @@
                             </Grid>
                         </Border>
                         <Grid Grid.Row="2" Margin="0,12,0,0">
-                            <CheckBox x:Name="ShowAllDevices" Content="Tüm cihazları göster" FontSize="12"
+                            <CheckBox x:Name="ShowAllDevices" Content="{local:L scan.showAll}" FontSize="12"
                                       VerticalAlignment="Center" Checked="ShowAllDevices_Changed"
                                       Unchecked="ShowAllDevices_Changed"/>
-                            <Button x:Name="ConnectButton" Content="Bağlan" Style="{StaticResource AccentAction}"
+                            <Button x:Name="ConnectButton" Content="{local:L scan.connect}" Style="{StaticResource AccentAction}"
                                     HorizontalAlignment="Right" MinWidth="96" IsEnabled="False"
                                     Click="ConnectSelected_Click"/>
                         </Grid>
@@ -244,9 +250,8 @@
                 <!-- Overlay -->
                 <Border Grid.Row="1" Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock Text="OBS OVERLAY" Style="{StaticResource SectionTitle}"/>
-                        <TextBlock Style="{StaticResource Muted}" Margin="0,2,0,10"
-                                   Text="OBS → Kaynaklar → + → Tarayıcı, sonra bu adresi yapıştır."/>
+                        <TextBlock Text="{local:L overlay.title}" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Text="{local:L overlay.howto}" Style="{StaticResource Muted}" Margin="0,2,0,10"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -254,13 +259,12 @@
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="UrlBox" IsReadOnly="True" Text="—" FontFamily="Cascadia Mono, Consolas"
                                      VerticalContentAlignment="Center"/>
-                            <Button Grid.Column="1" Content="Kopyala" Margin="8,0,0,0" Click="CopyUrl_Click"/>
+                            <Button Grid.Column="1" Content="{local:L overlay.copy}" Margin="8,0,0,0" Click="CopyUrl_Click"/>
                         </Grid>
                         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <Button Content="Overlay'i özelleştir" Style="{StaticResource AccentAction}"
-                                    Click="OpenEditor_Click"
-                                    ToolTip="Tema, renk, grafik ve efektleri tarayıcıda canlı önizlemeyle ayarla"/>
-                            <Button Content="Tarayıcıda aç" Margin="8,0,0,0" Click="OpenOverlay_Click"/>
+                            <Button Content="{local:L overlay.customize}" Style="{StaticResource AccentAction}"
+                                    Click="OpenEditor_Click" ToolTip="{local:L overlay.customize.tip}"/>
+                            <Button Content="{local:L overlay.openBrowser}" Margin="8,0,0,0" Click="OpenOverlay_Click"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -269,6 +273,6 @@
 
         <!-- ══════ STATUS BAR ══════ -->
         <TextBlock x:Name="StatusText" Grid.Row="2" Style="{StaticResource Muted}" Margin="2,14,0,0"
-                   TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Text="Hazırlanıyor…"/>
+                   TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Text="{local:L status.preparing}"/>
     </Grid>
 </Window>
