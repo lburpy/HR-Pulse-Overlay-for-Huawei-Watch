@@ -10,7 +10,7 @@ OBS'te özelleştirilebilir bir overlay olarak gösteren Windows uygulaması.
 **Kendini toparlayan bağlantı**
 - Bağlantı koparsa ya da saat veri göndermeyi bırakırsa (Huawei'nin HR yayını bazen sessizce durur)
   otomatik olarak yeniden bağlanır: 2 → 4 → 8 → 15 → 30 sn aralıklarla, durdurulana kadar.
-- Saat yeniden görünür görünmez (Bluetooth reklamı yakalanınca) beklemeyi atlayıp hemen bağlanır.
+- Saat yeniden görünür görünmez beklemeyi atlayıp hemen bağlanır.
 - 5 sn veri gelmezse "Sinyal yok", 20 sn gelmezse bağlantı baştan kurulur.
 - Saatler hatırlanır; uygulama açılınca listede durur, "Bağlan"a basınca bağlanır
   (açılışta kendiliğinden bağlanmaz).
