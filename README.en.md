@@ -10,7 +10,7 @@ standard BLE heart rate service) and shows it as a customizable overlay in OBS.
 **Self-healing connection**
 - If the link drops or the watch stops sending data (Huawei's HR broadcast sometimes stops silently),
   the app reconnects automatically: every 2 → 4 → 8 → 15 → 30 seconds, until you stop it.
-- As soon as the watch shows up again (its Bluetooth advertisement is seen), it skips the wait and
+- As soon as the watch shows up again, it skips the wait and
   connects right away.
 - No data for 5 seconds shows "No signal"; after 20 seconds the connection is rebuilt.
 - Watches are remembered and listed on startup; they connect when you press "Connect"
