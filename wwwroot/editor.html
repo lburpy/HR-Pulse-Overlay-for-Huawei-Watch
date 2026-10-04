@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overlay Düzenleyici · Pulse Overlay</title>
+<link rel="stylesheet" href="/editor.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <header class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12,21C12,21 4.5,16.4 2.4,11.6C0.9,8 3.1,4 6.9,4C9,4 10.5,5.2 12,7C13.5,5.2 15,4 17.1,4C20.9,4 23.1,8 21.6,11.6C19.5,16.4 12,21 12,21Z"/></svg>
+      <div>
+        <h1>Overlay Düzenleyici</h1>
+        <p>Pulse Overlay</p>
+      </div>
+    </header>
+
+    <section class="block">
+      <h2>Hazır şablonlar</h2>
+      <div id="presets" class="presets"></div>
+    </section>
+
+    <div id="controls"></div>
+
+    <button id="reset" class="btn ghost wide" type="button">Varsayılanlara dön</button>
+  </aside>
+
+  <main class="stage">
+    <div class="toolbar">
+      <div class="tgroup">
+        <span class="lbl">Önizleme verisi</span>
+        <div class="seg" id="dataSeg"></div>
+      </div>
+      <div class="tgroup" id="demoStateGroup">
+        <span class="lbl">Durum</span>
+        <select id="demoState">
+          <option value="live">Canlı</option>
+          <option value="lost">Sinyal yok</option>
+          <option value="reconnecting">Yeniden bağlanıyor</option>
+          <option value="off">Bağlı değil</option>
+        </select>
+      </div>
+      <div class="tgroup">
+        <span class="lbl">Arka plan</span>
+        <div class="seg" id="bgSeg"></div>
+      </div>
+    </div>
+
+    <div class="preview" id="preview">
+      <iframe id="frame" title="Overlay önizleme"></iframe>
+    </div>
+
+    <div class="output">
+      <div class="orow">
+        <label class="lbl" for="device">Saat</label>
+        <select id="device"><option value="">Otomatik (aktif saat)</option></select>
+        <input id="url" readonly aria-label="OBS adresi">
+        <button id="copy" class="btn primary" type="button">Adresi kopyala</button>
+      </div>
+      <div class="orow hint">
+        <span id="size" class="size">Önerilen OBS boyutu: —</span>
+        <span>OBS → Kaynaklar → <b>+</b> → <b>Tarayıcı</b> → adresi yapıştır, genişlik ve yüksekliği önerilen boyuta ayarla.</span>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="/editor.js"></script>
+</body>
+</html>

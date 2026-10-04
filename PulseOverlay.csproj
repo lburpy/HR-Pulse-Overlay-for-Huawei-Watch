@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>PulseOverlay</RootNamespace>
+    <AssemblyName>PulseOverlay</AssemblyName>
+    <Version>0.1.0</Version>
+    <Product>Pulse Overlay</Product>
+    <Description>Huawei saatinden canlı nabız overlay'i (OBS)</Description>
+    <ApplicationIcon>Assets\heart.ico</ApplicationIcon>
+    <!-- Fluent (Windows 11) theme is still marked experimental in WPF -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Overlay + editor web files ship inside the EXE -->
+    <EmbeddedResource Include="wwwroot\*" LogicalName="wwwroot/%(Filename)%(Extension)" />
+    <Resource Include="Assets\heart.ico" />
+  </ItemGroup>
+
+</Project>
