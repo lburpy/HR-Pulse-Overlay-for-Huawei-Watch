@@ -70,8 +70,8 @@ Requires the .NET 10 SDK.
 ```powershell
 dotnet run
 
-# Single-file EXE (includes the .NET runtime)
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+# Single-file EXE: publish\PulseOverlay.exe (~68 MB, no .NET install needed)
+dotnet publish -c Release -o publish
 ```
 
 To try changes to the overlay/editor files without rebuilding, set the `PULSEOVERLAY_WWWROOT`

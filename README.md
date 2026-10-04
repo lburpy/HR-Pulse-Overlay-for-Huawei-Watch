@@ -69,8 +69,8 @@ Ayarlar `%APPDATA%\PulseOverlay\settings.json` dosyasında tutulur.
 ```powershell
 dotnet run
 
-# Tek dosya EXE (.NET çalışma zamanı dahil)
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+# Tek dosya EXE: publish\PulseOverlay.exe (~68 MB, .NET kurulumu gerektirmez)
+dotnet publish -c Release -o publish
 ```
 
 Overlay/düzenleyici dosyalarını değiştirirken yeniden derlemeden denemek için
